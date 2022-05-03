@@ -4,7 +4,7 @@
 // general item use
 void Item::use(Player& player) { std::cout << "Item Used" << std::endl; }
 
-//specific potion data
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ POTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 std::vector<std::string> Potion::potion_names = { "Health Potion", "Strength Potion" };
 std::vector<int> Potion::quantities = { 0, 0 };
 
@@ -23,3 +23,13 @@ void StrengthPotion::use(Player& player) {
 }
 
 int StrengthPotion::turnsLeft = 0;
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ EXPLOSIVES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+std::vector<std::string> Explosive::explosive_names = { "Singular Explosive", "AOE Explosive" };
+std::vector<int> Explosive::quantities = { 0, 0 };
+
+void SingularExplosive::use(Entity& target) {
+	std::cout << "Kaboom! It's time to finish off that pesky " << target.getName() << std::endl;
+	target.setHealth(1);
+}
+

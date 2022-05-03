@@ -34,4 +34,17 @@ public:
 	static void use(Player& player);
 };
 
+
+struct Explosive : public Item {
+	static enum types { SINGULAR, AOE };
+	static std::vector<std::string> explosive_names;
+	static std::vector<int> quantities;
+	static const int price = 10;
+};
+
+class SingularExplosive : public Explosive {
+public:
+	static void use(Entity& target);
+};
+
 #endif

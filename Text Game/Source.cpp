@@ -11,30 +11,33 @@ void useInventory();
 void useShop();
 void levelOver();
 void playLevel(int lvlNum);
+void levelSelect();
 void changeWeapon();
 void generateEnemies(int lvlNum);
 
 
 // level and/or enemy data
-std::vector<Entity> enemiesLeft;
 std::vector<int> enumber = { 1, 2, 1, 5, 2, 1 };
 std::vector<Entity> levelEnemies;
+Entity* currentEnemy;
 
 //player data
 std::vector<Weapon> wepOptions = { Knife() };
 Player player = Player(wepOptions[0]);
 int StrengthPotion::initialPlayerDamage = player.getWeapon().getDamage();
-int currentLevel = 1;
+static int currentLevel = 1;
 
 int main() {
 	int ans;
 
 	do {
-		std::cout << "Welcome to [Generic Game Name]" << std::endl;
+		system("cls");
+		std::cout << std::endl << "Welcome to [Generic Game Name]" << std::endl;
 		std::cout << "Options:" <<
 			std::endl << '\t' << "1) Play Next Level" <<
-			std::endl << '\t' << "2) Change Weapons" <<
-			std::endl << '\t' << "3) Visit Shop" <<
+			std::endl << '\t' << "2) Play Another Level" <<
+			std::endl << '\t' << "3) Change Weapons" <<
+			std::endl << '\t' << "4) Visit Shop" <<
 			std::endl << '\t' << "0) Quit" <<
 			std::endl << "> ";
 
@@ -47,9 +50,13 @@ int main() {
 			else std::cout << "You have completed all levels" << std::endl;
 			break;
 		case 2:
-			changeWeapon();
+			if (currentLevel != 1) levelSelect();
+			else std::cout << "Please complete the first level to gain access to level select" << std::endl;
 			break;
 		case 3:
+			changeWeapon();
+			break;
+		case 4:
 			useShop();
 			break;
 		default:
@@ -61,12 +68,11 @@ int main() {
 
 void playLevel(int lvlnum) {
 	generateEnemies(lvlnum);
-	enemiesLeft = levelEnemies;
-	Entity* currentEnemy;
+	//enemiesLeft = levelEnemies;
 	int choice;
 
 	do {
-		if (enemiesLeft.size() >= 1) currentEnemy = &enemiesLeft.back();
+		if (levelEnemies.size() >= 1) currentEnemy = &levelEnemies.back();
 		else {
 			levelOver();
 			break;
@@ -79,7 +85,7 @@ void playLevel(int lvlnum) {
 		{
 		case 1:
 			system("cls");
-			std::cout << "You chose to attack the lvl:" << currentEnemy->getLevel() << ' ' << currentEnemy->getName() << " with health : " << currentEnemy->getHealth() << std::endl;
+			std::cout << "You chose to attack the lvl:" << currentEnemy->getLevel() << ' ' << currentEnemy->getName() << std::endl;
 
 			StrengthPotion::turnsLeft--;
 			if (StrengthPotion::turnsLeft == 0) {
@@ -90,14 +96,14 @@ void playLevel(int lvlnum) {
 			player.attack(*currentEnemy);
 
 			if (currentEnemy->getHealth() <= 0) {
-				enemiesLeft.pop_back();
+				levelEnemies.pop_back();
 				player.collectReward(currentEnemy->getRewardDrop());
 			}
 			else {
-				std::cout << "The new health is: " << currentEnemy->getHealth() << std::endl;
+				//std::cout << "The new health is: " << currentEnemy->getHealth() << std::endl;
 
 				currentEnemy->attack(player);
-				std::cout << "The " << currentEnemy->getName() << " has attacked for " << currentEnemy->getWeapon().getDamage() << std::endl;
+				std::cout << "The " << currentEnemy->getName() << " attacks back for " << currentEnemy->getWeapon().getDamage() << std::endl;
 			}
 			break;
 		case 2:
@@ -111,6 +117,22 @@ void playLevel(int lvlnum) {
 
 	} while (choice != 0);
 	
+}
+
+void levelSelect() {
+	int response;
+
+	system("cls");
+	std::cout << "Unlocked Levels:" << std::endl;
+	for (int i = 1; i <= currentLevel; i++) {
+		std::cout << '\t' << i << ") Level " << i << std::endl;
+	}
+
+	std::cout << "> ";
+	std::cin >> response;
+
+	if (response <= currentLevel && response > 0) playLevel(response);
+	else std::cout << "There was an error choosing that level" << std::endl;
 }
 
 void generateEnemies(int lvlNum) {
@@ -145,8 +167,9 @@ void generateEnemies(int lvlNum) {
 }
 
 void printMenu() {
+	system("cls");
 	std::cout << "Enemies: " << std::endl;
-	for (Entity e : enemiesLeft) {
+	for (Entity e : levelEnemies) {
 		std::cout << '\t' << "Entity Type: " << std::setw(10) << std::left << e.getName();
 		std::cout << std::setw(20) << std::right << "Level: " << std::setw(3) << std::left << e.getLevel();
 		std::cout << std::setw(20) << std::right << "Health: " << e.getHealth() << std::endl;
@@ -205,11 +228,11 @@ void useInventory() {
 		std::cout << "\t1) Potions" << std::endl << "\t2) Explosives" << std::endl << "\t0) Back" << std::endl << "> ";
 
 		std::cin >> response;
+		system("cls");
 
 		switch (response)
 		{
 		case 1:
-			system("cls");
 			std::cout << "Potions:" << std::endl;
 			for (int i = 0; i < Potion::potion_names.size(); i++) {
 				std::cout << '\t' << i + 1 << ") " << Potion::quantities[i] << "x " << Potion::potion_names[i] << std::endl;
@@ -231,7 +254,25 @@ void useInventory() {
 			}
 			break;
 		case 2:
-			std::cout << "That feature is not currently avaliable" << std::endl;
+			std::cout << "Explosives:" << std::endl;
+			for (int i = 0; i < Explosive::explosive_names.size(); i++) {
+				std::cout << '\t' << i + 1 << ") " << Explosive::quantities[i] << "x " << Explosive::explosive_names[i] << std::endl;
+			}
+
+			std::cout << "> ";
+			std::cin >> response;
+
+			if (response - 1 == Explosive::SINGULAR) {
+				if (Explosive::quantities[Explosive::SINGULAR] > 0) SingularExplosive::use(*currentEnemy);
+				else std::cout << "You do not have any of that item" << std::endl;
+			}
+			/*else if (response - 1 == Potion::STRENGTH) {
+				if (Potion::quantities[Potion::STRENGTH] > 0) {
+					StrengthPotion::turnsLeft = 3;
+					StrengthPotion::use(player);
+				}
+				else std::cout << "You do not have any of that item" << std::endl;
+			}*/
 			break;
 
 		default:
@@ -249,10 +290,11 @@ void useShop() {
 
 		std::cin >> response;
 
+		system("cls");
+
 		switch (response)
 		{
 		case 1:
-			system("cls");
 			std::cout << "Potions:" << std::endl;
 			for (int i = 0; i < Potion::potion_names.size(); i++) {
 				std::cout << '\t' << i + 1 << ") " << Potion::potion_names[i] << " ($" << Potion::price << " each)" << std::endl;
@@ -264,12 +306,30 @@ void useShop() {
 			if (player.getBallance() < Potion::price) std::cout << "Sorry but you do not have enough funds" << std::endl;
 
 			//else
-			try { Potion::quantities[response - 1]++; player.pay(Potion::price); }
-			catch (...) { std::cout << "Nothing Purchased"; }
+			if (response - 1 >= 0 && response <= Potion::potion_names.size()) { 
+				Potion::quantities[response - 1]++; 
+				player.pay(Potion::price); 
+			} 
+			else std::cout << "Nothing Purchased" << std::endl; 
 			
 			break;
 		case 2:
-			std::cout << "That feature is not currently avaliable" << std::endl;
+			std::cout << "Explosives:" << std::endl;
+			for (int i = 0; i < Explosive::explosive_names.size(); i++) {
+				std::cout << '\t' << i + 1 << ") " << Explosive::explosive_names[i] << " ($" << Explosive::price << " each)" << std::endl;
+			}
+			std::cout << "Your current ballance is: " << player.getBallance() << std::endl;
+			std::cout << "> ";
+			std::cin >> response;
+
+			if (player.getBallance() < Explosive::price) std::cout << "Sorry but you do not have enough funds" << std::endl;
+
+			//else
+			if (response - 1 >= 0 && response <= Explosive::explosive_names.size()) {
+				Explosive::quantities[response - 1]++;
+				player.pay(Explosive::price);
+			}
+			else std::cout << "Nothing Purchased" << std::endl;
 			break;
 
 		default:
