@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ITEM_H
+#define ITEM_H
 #include<string>
 #include<vector>
 #include "Entity.h"
@@ -33,3 +34,4 @@ public:
 	static void use(Player& player);
 };
 
+#endif

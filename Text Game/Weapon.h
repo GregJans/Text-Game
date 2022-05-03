@@ -1,4 +1,5 @@
-#pragma once
+#ifndef WEAPON_H
+#define WEAPON_H
 #include<string>
 
 class Weapon
@@ -47,6 +48,4 @@ public:
 	}
 };
 
-
-
-
+#endif

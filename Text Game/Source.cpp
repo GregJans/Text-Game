@@ -231,6 +231,7 @@ void useInventory() {
 			}
 			break;
 		case 2:
+			std::cout << "That feature is not currently avaliable" << std::endl;
 			break;
 
 		default:
@@ -268,6 +269,7 @@ void useShop() {
 			
 			break;
 		case 2:
+			std::cout << "That feature is not currently avaliable" << std::endl;
 			break;
 
 		default:
